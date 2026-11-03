@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+.pytest_cache/
+reports/
+*.pyc
+.venv/
+venv/
+
+# Environment files
+.env
+.env.*
+
+!.env.example
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

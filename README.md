@@ -1,2 +1,6 @@
-# YBW_INFRA
-YBW_INFRA  (quality/speed/professionalism)
+# CI Failure Intelligence PoC
+
+cd infra
+terraform init
+terraform plan
+terraform apply -auto-approve

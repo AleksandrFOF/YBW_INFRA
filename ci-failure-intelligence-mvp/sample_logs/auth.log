@@ -1,0 +1,7 @@
+GET https://api.example.com
+
+403 Forbidden
+
+authentication failed
+
+pipeline failed
