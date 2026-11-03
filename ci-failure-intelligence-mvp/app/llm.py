@@ -1,5 +1,7 @@
 from dotenv import load_dotenv
 from openai import AzureOpenAI
+
+import json
 import os
 
 load_dotenv()
@@ -13,7 +15,7 @@ client = AzureOpenAI(
 DEPLOYMENT = os.environ["AZURE_OPENAI_DEPLOYMENT"]
 
 
-def analyze(log_context: str, findings: list):
+def analyze_log(log_text, findings):
 
     response = client.chat.completions.create(
         model=DEPLOYMENT,
@@ -22,34 +24,75 @@ def analyze(log_context: str, findings: list):
         messages=[
             {
                 "role": "system",
-                "content": """
-You are a CI failure RCA expert.
-
-Return valid JSON only.
-"""
+                "content": "You are a CI RCA expert. Return JSON only."
             },
             {
                 "role": "user",
                 "content": f"""
-Known findings:
-
+Findings:
 {findings}
 
 Log:
-
-{log_context}
-
-Return:
-
-{{
-  "failure_category": "",
-  "root_cause": "",
-  "confidence": 0,
-  "recommendations": []
-}}
+{log_text}
 """
             }
         ]
     )
 
-    return response
+    data = json.loads(
+        response.choices[0].message.content
+    )
+
+    data["token_usage"] = {
+        "prompt": response.usage.prompt_tokens,
+        "completion": response.usage.completion_tokens,
+        "total": response.usage.total_tokens
+    }
+
+    return data
+
+
+def chat_about_failure(analysis, question):
+
+    response = client.chat.completions.create(
+        model=DEPLOYMENT,
+        temperature=0,
+        messages=[
+            {
+                "role": "system",
+                "content": "Answer using RCA context."
+            },
+            {
+                "role": "user",
+                "content": f"""
+RCA:
+{json.dumps(analysis, indent=2)}
+
+Question:
+{question}
+"""
+            }
+        ]
+    )
+
+    return response.choices[0].message.content
+
+
+def general_chat(question):
+
+    response = client.chat.completions.create(
+        model=DEPLOYMENT,
+        temperature=0,
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a CI/CD Copilot assistant."
+            },
+            {
+                "role": "user",
+                "content": question
+            }
+        ]
+    )
+
+    return response.choices[0].message.content
