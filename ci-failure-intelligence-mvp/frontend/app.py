@@ -1,10 +1,37 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+MODEL_NAME = os.getenv(
+    "AZURE_OPENAI_DEPLOYMENT",
+    "gpt-4.1"
+)
+
+PROVIDER_NAME = "Azure OpenAI"
 import streamlit as st, requests
 API_URL='http://localhost:9000'
 st.set_page_config(page_title='CI Failure Intelligence Copilot',page_icon='🤖',layout='wide')
-st.title('🤖 CI Failure Intelligence Copilot')
+st.title("🤖 CI Failure Intelligence Copilot")
+
+st.caption(
+    f"Powered by {PROVIDER_NAME} • {MODEL_NAME}"
+)
 if 'messages' not in st.session_state: st.session_state.messages=[]
 if 'analysis' not in st.session_state: st.session_state.analysis=None
 with st.sidebar:
+    st.header("AI Configuration")
+
+    st.success("🟢 Connected")
+
+    st.metric(
+        "Model",
+        MODEL_NAME
+    )
+
+    st.caption(PROVIDER_NAME)
+
+    st.divider()    
     st.header('Context')
     uploaded=st.file_uploader('📎 Attach Build Log',type=['log','txt'])
     if uploaded and st.button('Analyze Log'):
